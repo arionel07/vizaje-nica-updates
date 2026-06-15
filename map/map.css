@@ -1,0 +1,710 @@
+/* ==========================================================================
+   Store Map / Store Locator
+   --------------------------------------------------------------------------
+   Purpose:
+   Premium store locator page for Vizaje-Nica.
+
+   UX goals:
+   - Help users quickly find the nearest Vizaje-Nica store.
+   - Show physical store presence and increase trust.
+   - Provide both list and map views.
+   - Improve mobile navigation with list/map tabs.
+   - Replace old embedded map with a cleaner premium experience.
+
+   Technology:
+   - MapLibre GL
+   - OpenFreeMap style
+   - No Google Maps API required
+   - No Mapbox token required
+
+   Related files:
+   - stores-map.php
+   - stores-map.js
+   - language.json
+   - README.md
+   - design/
+
+   Important:
+   - JS reads store data from data-* attributes in stores-map.php.
+   - JS controls active store cards, active markers and info panel.
+   - Do not rename .vn-store-card or data-store-card without updating JS.
+   ========================================================================== */
+
+/* ==========================================================================
+   Page Layout
+   ========================================================================== */
+
+.vn-stores {
+	padding: 80px 0 120px;
+	background: #fff;
+}
+
+.vn-stores__container {
+	position: relative;
+}
+
+/* ==========================================================================
+   Header
+   ========================================================================== */
+
+.vn-stores__header {
+	max-width: 640px;
+	margin-bottom: 48px;
+}
+
+.vn-stores__eyebrow {
+	margin-bottom: 12px;
+	font-size: 12px;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: #777;
+}
+
+.vn-stores__title {
+	margin: 0;
+	font-family: var(--font-title);
+	font-size: clamp(36px, 5vw, 64px);
+	line-height: 1;
+	font-weight: 500;
+	color: #111;
+}
+
+.vn-stores__text {
+	max-width: 480px;
+	margin-top: 20px;
+	font-size: 16px;
+	line-height: 1.6;
+	color: #666;
+}
+
+/* ==========================================================================
+   Trust Features
+   --------------------------------------------------------------------------
+   Small trust row below the page intro.
+   ========================================================================== */
+
+.vn-stores__features {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	margin: 40px 0 48px;
+	border-top: 1px solid #e8e8e8;
+	border-bottom: 1px solid #e8e8e8;
+}
+
+.vn-stores__features div {
+	padding: 18px 24px;
+	border-right: 1px solid #e8e8e8;
+	font-size: 13px;
+	color: #555;
+}
+
+.vn-stores__features div:last-child {
+	border-right: 0;
+}
+
+/* ==========================================================================
+   Desktop Layout
+   --------------------------------------------------------------------------
+   Left column: store list.
+   Right column: sticky interactive map.
+   ========================================================================== */
+
+.vn-stores__layout {
+	display: grid;
+	grid-template-columns: minmax(320px, 420px) 1fr;
+	gap: 32px;
+	align-items: stretch;
+}
+
+/* ==========================================================================
+   Store List
+   ========================================================================== */
+
+.vn-stores__list {
+	max-height: 720px;
+	overflow-y: auto;
+	padding-right: 10px;
+}
+
+.vn-stores__list::-webkit-scrollbar {
+	width: 4px;
+}
+
+.vn-stores__list::-webkit-scrollbar-thumb {
+	background: #111;
+}
+
+/* ==========================================================================
+   Store Card
+   --------------------------------------------------------------------------
+   JS adds .is-active when card is selected.
+   ========================================================================== */
+
+.vn-store-card {
+	margin-top: 10px;
+	padding: 24px;
+	border: 1px solid #e8e8e8;
+	border-radius: 6px;
+	background: #fff;
+	cursor: pointer;
+	transition:
+		border-color 0.3s ease,
+		transform 0.3s ease,
+		box-shadow 0.3s ease;
+}
+
+.vn-store-card + .vn-store-card {
+	margin-top: 12px;
+}
+
+.vn-store-card.is-active {
+	border-color: #111;
+	box-shadow: 0 18px 50px rgba(0, 0, 0, 0.06);
+}
+
+.vn-store-card__top {
+	display: flex;
+	justify-content: space-between;
+	gap: 20px;
+}
+
+.vn-store-card__title {
+	margin: 0;
+	font-size: 18px;
+	line-height: 1.25;
+	font-weight: 600;
+	color: #111;
+}
+
+.vn-store-card__number {
+	font-size: 12px;
+	color: #999;
+}
+
+.vn-store-card__address {
+	margin: 12px 0 0;
+	font-size: 15px;
+	line-height: 1.5;
+	color: #222;
+}
+
+.vn-store-card__meta {
+	display: grid;
+	gap: 16px;
+	margin-top: 22px;
+}
+
+.vn-store-card__meta span {
+	display: block;
+	margin-bottom: 5px;
+	font-size: 12px;
+	color: #999;
+}
+
+.vn-store-card__meta p,
+.vn-store-card__meta a {
+	margin: 0;
+	font-size: 15px;
+	color: #111;
+	text-decoration: none;
+}
+
+.vn-store-card__button {
+	width: 100%;
+	height: 44px;
+	margin-top: 24px;
+	border: 1px solid #111;
+	border-radius: 6px;
+	background: #111;
+	color: #fff;
+	font-size: 14px;
+	cursor: pointer;
+	transition:
+		background 0.3s ease,
+		color 0.3s ease;
+}
+
+/* ==========================================================================
+   Map Container
+   ========================================================================== */
+
+.vn-stores__map-wrap {
+	position: sticky;
+	top: 120px;
+	height: 720px;
+	overflow: hidden;
+	background: #f5f5f5;
+}
+
+.vn-stores__map {
+	width: 100%;
+	height: 100%;
+	min-height: 700px;
+}
+
+/* ==========================================================================
+   Glass Info Panel
+   --------------------------------------------------------------------------
+   Shown after user selects a marker or store card.
+
+   JS:
+   - updates title
+   - updates address
+   - updates phone
+   - updates route link
+   - adds .is-visible
+   ========================================================================== */
+
+.vn-map-panel {
+	position: absolute;
+	left: 24px;
+	right: 24px;
+	bottom: 24px;
+	max-width: 430px;
+	padding: 22px;
+	border: 1px solid rgba(255, 255, 255, 0.55);
+	border-radius: 18px;
+	background: linear-gradient(
+		135deg,
+		rgba(255, 255, 255, 0.86),
+		rgba(255, 255, 255, 0.64)
+	);
+	backdrop-filter: blur(3px) saturate(140%);
+	-webkit-backdrop-filter: blur(3px) saturate(140%);
+	box-shadow:
+		0 24px 70px rgba(0, 0, 0, 0.18),
+		inset 0 1px 0 rgba(255, 255, 255, 0.7);
+	transform: translateY(24px) scale(0.96);
+	opacity: 0;
+	pointer-events: none;
+	transition:
+		opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+		transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.vn-map-panel.is-visible {
+	opacity: 1;
+	transform: translateY(0) scale(1);
+	pointer-events: auto;
+}
+
+.vn-map-panel__brand {
+	margin-bottom: 14px;
+	font-size: 11px;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: rgba(17, 17, 17, 0.58);
+}
+
+.vn-map-panel__head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 18px;
+}
+
+.vn-map-panel__title {
+	margin: 0;
+	font-size: 22px;
+	line-height: 1.18;
+	font-weight: 600;
+	color: #111;
+}
+
+.vn-map-panel__mark {
+	width: 34px;
+	height: 34px;
+	flex: 0 0 34px;
+	border-radius: 50%;
+	background: #111;
+	color: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-family: serif;
+	font-size: 15px;
+	font-weight: 700;
+}
+
+.vn-map-panel__address {
+	margin: 14px 0 0;
+	font-size: 14px;
+	line-height: 1.55;
+	color: rgba(17, 17, 17, 0.68);
+}
+
+.vn-map-panel__meta {
+	display: grid;
+	gap: 12px;
+	margin-top: 18px;
+	padding-top: 18px;
+	border-top: 1px solid rgba(17, 17, 17, 0.08);
+}
+
+.vn-map-panel__meta span {
+	display: block;
+	margin-bottom: 4px;
+	font-size: 11px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: rgba(17, 17, 17, 0.45);
+}
+
+.vn-map-panel__meta a {
+	color: #111;
+	text-decoration: none;
+	font-size: 14px;
+}
+
+.vn-map-panel__link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	min-height: 44px;
+	margin-top: 20px;
+	border-radius: 999px;
+	background: #111;
+	color: #fff;
+	text-decoration: none;
+	font-size: 13px;
+	font-weight: 500;
+	transition:
+		background 0.25s ease,
+		color 0.25s ease,
+		transform 0.25s ease;
+}
+
+/* ==========================================================================
+   Custom Map Markers
+   --------------------------------------------------------------------------
+   Markers are DOM elements created in stores-map.js.
+
+   Default state:
+   - shows store number.
+
+   Active state:
+   - switches to V brand mark.
+   ========================================================================== */
+
+.vn-map-marker {
+	position: relative;
+	width: 40px;
+	height: 40px;
+	border: 1px solid #111;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.94);
+	color: #111;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 11px;
+	font-weight: 500;
+	cursor: pointer;
+	box-shadow: 0 14px 34px rgba(0, 0, 0, 0.12);
+	backdrop-filter: blur(12px);
+	transition:
+		transform 0.25s ease,
+		background 0.25s ease,
+		color 0.25s ease,
+		box-shadow 0.25s ease;
+}
+
+.vn-map-marker__number,
+.vn-map-marker__brand {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition:
+		opacity 0.22s ease,
+		transform 0.22s ease;
+}
+
+.vn-map-marker__brand {
+	opacity: 0;
+	transform: scale(0.75);
+	font-family: serif;
+	font-size: 18px;
+	font-weight: 400;
+	letter-spacing: -0.04em;
+}
+
+.vn-map-marker.is-active {
+	background: #111;
+	color: #fff;
+	transform: scale(1.18);
+	box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22);
+}
+
+.vn-map-marker.is-active .vn-map-marker__number {
+	opacity: 0;
+	transform: scale(0.75);
+}
+
+.vn-map-marker.is-active .vn-map-marker__brand {
+	opacity: 1;
+	transform: scale(1);
+}
+
+/* ==========================================================================
+   Mobile Tabs
+   --------------------------------------------------------------------------
+   Hidden on desktop.
+   Visible on mobile to switch between list and map.
+   ========================================================================== */
+
+.vn-stores__mobile-tabs {
+	display: none;
+}
+
+/* ==========================================================================
+   MapLibre Overrides
+   ========================================================================== */
+
+.maplibregl-canvas {
+	outline: none;
+}
+
+.maplibregl-ctrl-bottom-left,
+.maplibregl-ctrl-attrib {
+	display: none !important;
+}
+
+/* ==========================================================================
+   Hover States
+   --------------------------------------------------------------------------
+   Applied only on devices that support hover.
+   Prevents sticky hover states on mobile.
+   ========================================================================== */
+
+@media (hover: hover) {
+	.vn-store-card:hover {
+		border-color: #111;
+		box-shadow: 0 18px 50px rgba(0, 0, 0, 0.06);
+		transform: translateY(-2px);
+	}
+
+	.vn-store-card__button:hover {
+		background: #fff;
+		color: #111;
+	}
+
+	.vn-map-marker:hover {
+		transform: scale(1.12);
+	}
+
+	.vn-map-marker.is-active:hover {
+		transform: scale(1.18);
+	}
+
+	.vn-map-panel__link:hover {
+		background: #fff;
+		color: #111;
+		transform: translateY(-1px);
+	}
+}
+
+/* ==========================================================================
+   Responsive: Tablet
+   ========================================================================== */
+
+@media (max-width: 900px) {
+	.vn-stores {
+		padding: 56px 0 80px;
+	}
+
+	.vn-stores__layout {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.vn-stores__map-wrap {
+		position: relative;
+		top: auto;
+		order: -1;
+		height: 520px;
+	}
+
+	.vn-stores__list {
+		max-height: none;
+		overflow: visible;
+		padding-right: 0;
+	}
+
+	.vn-map-panel {
+		left: 14px;
+		right: 14px;
+		bottom: 14px;
+	}
+}
+
+/* ==========================================================================
+   Responsive: Mobile
+   ========================================================================== */
+
+@media (max-width: 768px) {
+	.vn-stores {
+		padding: 44px 0 72px;
+	}
+
+	.vn-stores__header {
+		margin-bottom: 30px;
+	}
+
+	.vn-stores__title {
+		font-size: 42px;
+		line-height: 1;
+	}
+
+	.vn-stores__text {
+		margin-top: 18px;
+		font-size: 15px;
+		line-height: 1.6;
+	}
+
+	.vn-stores__features {
+		grid-template-columns: 1fr;
+		margin: 32px 0 24px;
+	}
+
+	.vn-stores__features div {
+		padding: 16px 0;
+		border-right: 0;
+		border-bottom: 1px solid #e8e8e8;
+		font-size: 13px;
+	}
+
+	.vn-stores__mobile-tabs {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 6px;
+		margin-bottom: 24px;
+		padding: 4px;
+		border: 1px solid #e8e8e8;
+		border-radius: 999px;
+		background: #f7f7f7;
+	}
+
+	.vn-stores__mobile-tab {
+		height: 42px;
+		border: 0;
+		border-radius: 999px;
+		background: transparent;
+		color: #777;
+		font-size: 14px;
+		cursor: pointer;
+		transition:
+			background 0.25s ease,
+			color 0.25s ease,
+			box-shadow 0.25s ease;
+	}
+
+	.vn-stores__mobile-tab.is-active {
+		background: #111;
+		color: #fff;
+		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+	}
+
+	.vn-stores__layout {
+		display: block;
+	}
+
+	.vn-stores__list {
+		max-height: none;
+		overflow: visible;
+		padding-right: 0;
+	}
+
+	.vn-store-card {
+		margin-top: 12px;
+		padding: 22px;
+		border-radius: 10px;
+	}
+
+	.vn-store-card__button {
+		height: 46px;
+		border-radius: 999px;
+	}
+
+	.vn-stores__map-wrap {
+		display: none;
+		position: relative;
+		top: auto;
+		order: initial;
+		height: 500px;
+		margin: 0 -16px 28px;
+		border-radius: 0;
+	}
+
+	.vn-stores__map {
+		min-height: 500px;
+	}
+
+	.vn-stores.is-map-view .vn-stores__map-wrap {
+		display: block;
+	}
+
+	.vn-stores.is-map-view .vn-stores__list {
+		display: none;
+	}
+
+	.vn-stores.is-list-view .vn-stores__map-wrap {
+		display: none;
+	}
+
+	.vn-stores.is-list-view .vn-stores__list {
+		display: block;
+	}
+}
+
+/* ==========================================================================
+   Responsive: Small Mobile
+   ========================================================================== */
+
+@media (max-width: 520px) {
+	.vn-stores {
+		padding-top: 48px;
+	}
+
+	.vn-stores__header {
+		margin-bottom: 32px;
+	}
+
+	.vn-stores__map-wrap {
+		height: 470px;
+		margin-left: -16px;
+		margin-right: -16px;
+	}
+
+	.vn-stores__map {
+		min-height: 470px;
+	}
+
+	.vn-store-card {
+		padding: 20px;
+	}
+
+	.vn-map-panel {
+		left: 12px;
+		right: 12px;
+		bottom: 12px;
+		padding: 18px;
+		border-radius: 18px;
+	}
+
+	.vn-map-panel__brand {
+		margin-bottom: 10px;
+		font-size: 10px;
+	}
+
+	.vn-map-panel__title {
+		font-size: 19px;
+	}
+
+	.vn-map-panel__link {
+		min-height: 42px;
+		margin-top: 16px;
+	}
+}

@@ -1,0 +1,161 @@
+/* ==========================================================================
+   Pickup Stores & Mail Delivery Selection
+   --------------------------------------------------------------------------
+   Used inside checkout delivery methods.
+
+   Purpose:
+   - Store pickup selection.
+   - Postal delivery operator selection.
+
+   Current usage:
+   - Pickup stores (test data).
+   - Nova Poshta.
+   - Poșta Moldovei.
+
+   Important:
+   Pickup stores currently contain temporary data.
+
+   TODO:
+   - Add all 12 Vizaje-Nica stores.
+   - Save selected store in order.
+   - Display selected store in admin panel.
+   - Display selected store for manager before customer confirmation.
+   - Save selected postal operator in order.
+
+   Related files:
+   - stores.php
+   - post.php
+   - payments.php
+   - payments.js
+   ========================================================================== */
+
+/* ==========================================================================
+   Selection List
+   --------------------------------------------------------------------------
+   Container for pickup stores and postal delivery methods.
+   ========================================================================== */
+
+.checkout-pick-list {
+	display: grid;
+	gap: 12px;
+}
+
+/* ==========================================================================
+   Selection Card
+   --------------------------------------------------------------------------
+   Individual pickup store or postal delivery option.
+   ========================================================================== */
+
+.checkout-pick-item {
+	position: relative;
+
+	display: grid;
+	grid-template-columns: 18px 1fr;
+	gap: 14px;
+	align-items: start;
+
+	padding: 16px;
+
+	background: #fff;
+	border: 1px solid #e5e5e5;
+	border-radius: 6px;
+
+	cursor: pointer;
+
+	transition:
+		border-color 0.2s ease,
+		background 0.2s ease;
+}
+
+/* Hide native radio input */
+.checkout-pick-item input {
+	display: none;
+}
+
+/* ==========================================================================
+   Active State
+   --------------------------------------------------------------------------
+   Applied when store/operator is selected.
+   ========================================================================== */
+
+.checkout-pick-item.is-active {
+	border-color: #111;
+	background: #fafafa;
+}
+
+/* ==========================================================================
+   Custom Radio
+   --------------------------------------------------------------------------
+   Custom replacement for browser radio buttons.
+   ========================================================================== */
+
+.checkout-pick-item__radio {
+	width: 18px;
+	height: 18px;
+
+	border: 1px solid #bdbdbd;
+	border-radius: 50%;
+
+	position: relative;
+	margin-top: 2px;
+}
+
+.checkout-pick-item__radio::after {
+	content: '';
+
+	width: 8px;
+	height: 8px;
+
+	border-radius: 50%;
+	background: #111;
+
+	position: absolute;
+	top: 50%;
+	left: 50%;
+
+	transform: translate(-50%, -50%) scale(0);
+
+	transition: transform 0.2s ease;
+}
+
+/* Show inner dot when selected */
+.checkout-pick-item input:checked + .checkout-pick-item__radio::after {
+	transform: translate(-50%, -50%) scale(1);
+}
+
+/* ==========================================================================
+   Content Area
+   --------------------------------------------------------------------------
+   Store name, address or postal delivery information.
+   ========================================================================== */
+
+.checkout-pick-item__content {
+	display: grid;
+	gap: 5px;
+}
+
+.checkout-pick-item__content strong {
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.checkout-pick-item__content small {
+	font-size: 13px;
+	color: #777;
+}
+
+/* ==========================================================================
+   Postal Delivery Form
+   --------------------------------------------------------------------------
+   Additional fields displayed after selecting postal delivery.
+
+   Status:
+   Future feature.
+
+   Important:
+   Business rules still need approval before implementation.
+   ========================================================================== */
+
+.checkout-post-form {
+	margin-top: 18px;
+}

@@ -1,0 +1,67 @@
+{
+	"ru": {
+		"stores_eyebrow": "Vizaje-Nica",
+		"stores_title": "Наши магазины",
+		"stores_description": "Выберите ближайший магазин Vizaje-Nica в Кишинёве.",
+
+		"stores_feature_1": "12 магазинов в Кишинёве",
+		"stores_feature_2": "100% оригинальная продукция",
+		"stores_feature_3": "Тестирование в магазинах",
+
+		"stores_tab_list": "Списком",
+		"stores_tab_map": "На карте",
+
+		"stores_working_hours": "Режим работы",
+		"stores_phone": "Телефон",
+
+		"stores_show_on_map": "Показать на карте",
+		"stores_build_route": "Построить маршрут",
+
+		"stores_panel_brand": "Vizaje-Nica",
+
+		"stores_map_loading": "Загрузка карты...",
+		"stores_map_error": "Не удалось загрузить карту.",
+
+		"stores_route_google": "Построить маршрут",
+
+		"stores_number_prefix": "Магазин",
+
+		"stores_test_note": "Список магазинов отображается из административной панели.",
+
+		"stores_original_products": "100% оригинальная продукция",
+		"stores_testing_available": "Тестирование в магазинах"
+	},
+
+	"ro": {
+		"stores_eyebrow": "Vizaje-Nica",
+		"stores_title": "Magazinele noastre",
+		"stores_description": "Alege cel mai apropiat magazin Vizaje-Nica din Chișinău.",
+
+		"stores_feature_1": "12 magazine în Chișinău",
+		"stores_feature_2": "Produse 100% originale",
+		"stores_feature_3": "Testare disponibilă în magazine",
+
+		"stores_tab_list": "Listă",
+		"stores_tab_map": "Hartă",
+
+		"stores_working_hours": "Program",
+		"stores_phone": "Telefon",
+
+		"stores_show_on_map": "Afișează pe hartă",
+		"stores_build_route": "Construiește ruta",
+
+		"stores_panel_brand": "Vizaje-Nica",
+
+		"stores_map_loading": "Se încarcă harta...",
+		"stores_map_error": "Harta nu a putut fi încărcată.",
+
+		"stores_route_google": "Construiește ruta",
+
+		"stores_number_prefix": "Magazin",
+
+		"stores_test_note": "Lista magazinelor este afișată din panoul administrativ.",
+
+		"stores_original_products": "Produse 100% originale",
+		"stores_testing_available": "Testare disponibilă în magazine"
+	}
+}

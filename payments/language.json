@@ -1,0 +1,231 @@
+{
+	"ru": {
+		"checkout": {
+			"title": "Оформление заказа",
+
+			"alert_title": "Проверьте данные заказа",
+			"alert_text": "Заполните обязательные поля, чтобы продолжить оформление.",
+
+			"steps": {
+				"delivery": "Адрес и способ доставки",
+				"recipient": "Получатель",
+				"payment": "Способ оплаты"
+			},
+
+			"buttons": {
+				"next": "Дальше",
+				"finish": "Завершить оформление",
+				"continue_shopping": "Продолжить покупки"
+			},
+
+			"delivery": {
+				"pickup": {
+					"title": "Самовывоз из магазина",
+					"text": "Бесплатно",
+					"label": "Выберите магазин"
+				},
+
+				"courier": {
+					"title": "Курьерская доставка",
+					"text": "Бесплатно от 500 MDL"
+				},
+
+				"express": {
+					"title": "Срочная доставка",
+					"text": "В течение 3 часов · 100 MDL",
+					"notice": "Срочная доставка доступна в пределах Кишинёва. Стоимость: 100 MDL."
+				},
+
+				"mail": {
+					"title": "Доставка почтой",
+					"text": "По тарифам службы доставки",
+					"label": "Выберите способ почтовой доставки"
+				}
+			},
+
+			"mail": {
+				"nova_poshta": {
+					"title": "Nova Poshta",
+					"text": "Доставка в отделение или курьером"
+				},
+
+				"posta_moldovei": {
+					"title": "Poșta Moldovei",
+					"text": "Доставка по тарифам оператора"
+				}
+			},
+
+			"stores": {
+				"label": "Выберите магазин"
+			},
+
+			"fields": {
+				"city": "Населённый пункт",
+				"address": "Адрес",
+				"house": "Дом",
+				"entrance": "Подъезд",
+				"apartment": "Квартира",
+
+				"region": "Город / район",
+				"post_office": "Отделение / адрес доставки",
+				"postal_code": "Индекс",
+
+				"phone": "Телефон",
+				"email": "example@gmail.com",
+
+				"first_name": "Имя",
+				"last_name": "Фамилия",
+				"checkout_comment_label": "Комментарий к заказу",
+				"checkout_comment_placeholder": "Например: позвонить за 30 минут до доставки, не звонить в рабочее время, подарок и т.д."
+			},
+
+			"confirmation": {
+				"call": "Связаться со мной по телефону",
+				"sms": "Отправить SMS"
+			},
+
+			"agreements": {
+				"terms": "Я согласен с Условиями и положениями.",
+				"marketing": "Я согласен получать рекламные рассылки об акциях и скидках."
+			},
+
+			"payment": {
+				"cash": "Наличными при получении",
+				"card_courier": "Оплата картой курьеру",
+				"online": "Онлайн картой"
+			},
+
+			"summary": {
+				"title": "Сумма заказа",
+				"products": "Товары",
+				"delivery": "Доставка",
+				"free": "Бесплатно",
+				"total": "Итого",
+
+				"online_note": "При онлайн оплате после подтверждения заказа вы будете перенаправлены на страницу Paynet."
+			},
+
+			"success_modal": {
+				"eyebrow": "Спасибо за ваш заказ",
+				"title": "Мы уже начали заботиться о нём",
+				"text": "Ваш заказ успешно принят. Менеджер Vizaje-Nica скоро свяжется с вами, чтобы подтвердить детали и помочь с доставкой.",
+				"button": "Продолжить покупки"
+			}
+		}
+	},
+
+	"ro": {
+		"checkout": {
+			"title": "Finalizarea comenzii",
+
+			"alert_title": "Verificați datele comenzii",
+			"alert_text": "Completați câmpurile obligatorii pentru a continua.",
+
+			"steps": {
+				"delivery": "Adresă și metodă de livrare",
+				"recipient": "Destinatar",
+				"payment": "Metodă de plată"
+			},
+
+			"buttons": {
+				"next": "Continuă",
+				"finish": "Finalizează comanda",
+				"continue_shopping": "Continuă cumpărăturile"
+			},
+
+			"delivery": {
+				"pickup": {
+					"title": "Ridicare din magazin",
+					"text": "Gratuit",
+					"label": "Alege magazinul"
+				},
+
+				"courier": {
+					"title": "Livrare prin curier",
+					"text": "Gratuit de la 500 MDL"
+				},
+
+				"express": {
+					"title": "Livrare expres",
+					"text": "În maximum 3 ore · 100 MDL",
+					"notice": "Livrarea expres este disponibilă doar în Chișinău. Cost: 100 MDL."
+				},
+
+				"mail": {
+					"title": "Livrare prin poștă",
+					"text": "Conform tarifelor serviciului de livrare",
+					"label": "Alege metoda de livrare prin poștă"
+				}
+			},
+
+			"mail": {
+				"nova_poshta": {
+					"title": "Nova Poshta",
+					"text": "Livrare la oficiu sau prin curier"
+				},
+
+				"posta_moldovei": {
+					"title": "Poșta Moldovei",
+					"text": "Livrare conform tarifelor operatorului"
+				}
+			},
+
+			"stores": {
+				"label": "Alege magazinul"
+			},
+
+			"fields": {
+				"city": "Localitate",
+				"address": "Adresă",
+				"house": "Casă",
+				"entrance": "Scară",
+				"apartment": "Apartament",
+
+				"region": "Oraș / raion",
+				"post_office": "Oficiu poștal / adresă de livrare",
+				"postal_code": "Cod poștal",
+
+				"phone": "Telefon",
+				"email": "example@gmail.com",
+
+				"first_name": "Prenume",
+				"last_name": "Nume",
+				"checkout_comment_label": "Comentariu pentru comandă",
+				"checkout_comment_placeholder": "De exemplu: sunați cu 30 de minute înainte de livrare, nu sunați în timpul programului de lucru, este un cadou etc."
+			},
+
+			"confirmation": {
+				"call": "Contactați-mă prin telefon",
+				"sms": "Trimiteți SMS"
+			},
+
+			"agreements": {
+				"terms": "Sunt de acord cu Termenii și condițiile.",
+				"marketing": "Sunt de acord să primesc oferte promoționale și informații despre reduceri."
+			},
+
+			"payment": {
+				"cash": "Numerar la primire",
+				"card_courier": "Plată cu cardul la curier",
+				"online": "Plată online cu cardul"
+			},
+
+			"summary": {
+				"title": "Rezumat comandă",
+				"products": "Produse",
+				"delivery": "Livrare",
+				"free": "Gratuit",
+				"total": "Total",
+
+				"online_note": "După confirmarea comenzii veți fi redirecționat către pagina Paynet pentru plata online."
+			},
+
+			"success_modal": {
+				"eyebrow": "Vă mulțumim pentru comandă",
+				"title": "Am început deja să ne ocupăm de ea",
+				"text": "Comanda dumneavoastră a fost înregistrată cu succes. Un consultant Vizaje-Nica vă va contacta în curând pentru confirmare și detalii de livrare.",
+				"button": "Continuă cumpărăturile"
+			}
+		}
+	}
+}

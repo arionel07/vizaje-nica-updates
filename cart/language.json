@@ -1,0 +1,47 @@
+{
+	"ru": {
+		"cart": {
+			"title": "Корзина",
+			"promo_notice": "Промокоды не действуют в период скидок и на акционные товары.",
+			"empty_title": "В корзине пока ничего нет",
+			"empty_text": "Добавьте любимые ароматы и начните создавать свою коллекцию.",
+			"go_catalog": "Перейти в каталог",
+			"free_delivery": "Бесплатная доставка от",
+			"promo_placeholder": "Промокод",
+			"promo_apply": "Применить",
+			"subtotal": "Сумма товаров",
+			"discount": "Скидка",
+			"delivery": "Доставка",
+			"delivery_free": "Бесплатно",
+			"total": "Итого",
+			"checkout": "Оформить заказ",
+			"continue_shopping": "Продолжить покупки",
+			"remove_item": "Удалить товар",
+			"increase_qty": "Увеличить количество",
+			"decrease_qty": "Уменьшить количество"
+		}
+	},
+
+	"ro": {
+		"cart": {
+			"title": "Coș",
+			"promo_notice": "Codurile promoționale nu sunt valabile pentru produsele aflate la reducere sau în promoție.",
+			"empty_title": "Coșul este gol",
+			"empty_text": "Adăugați parfumurile preferate și începeți să vă creați propria colecție.",
+			"go_catalog": "Mergi în catalog",
+			"free_delivery": "Livrare gratuită de la",
+			"promo_placeholder": "Cod promoțional",
+			"promo_apply": "Aplică",
+			"subtotal": "Valoarea produselor",
+			"discount": "Reducere",
+			"delivery": "Livrare",
+			"delivery_free": "Gratuit",
+			"total": "Total",
+			"checkout": "Finalizează comanda",
+			"continue_shopping": "Continuă cumpărăturile",
+			"remove_item": "Șterge produsul",
+			"increase_qty": "Mărește cantitatea",
+			"decrease_qty": "Micșorează cantitatea"
+		}
+	}
+}

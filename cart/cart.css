@@ -1,0 +1,583 @@
+/* ==========================================================================
+   Cart drawer module
+   --------------------------------------------------------------------------
+   Purpose:
+   - Side drawer cart used globally across the website.
+   - Includes overlay, cart items list, empty state, promo code block,
+     totals summary, checkout link and continue shopping action.
+
+   Related files:
+   - cart.php
+   - cart.js
+   - language.json
+
+   Important:
+   - JS depends on class names such as:
+     .cart-drawer, .cart-overlay, .cart-item,
+     .cart-item__qty-minus, .cart-item__qty-plus,
+     .cart-item__qty-value, .cart-summary__*
+   - Do not rename these classes without updating cart.js.
+   ========================================================================== */
+
+/* ==========================================================================
+   Overlay
+   --------------------------------------------------------------------------
+   Dark background behind the cart drawer.
+   JS toggles .is-open together with .cart-drawer.
+   ========================================================================== */
+
+.cart-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.55);
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.5s ease;
+	z-index: 9998;
+}
+
+.cart-overlay.is-open {
+	opacity: 1;
+	visibility: visible;
+}
+
+/* ==========================================================================
+   Drawer shell
+   --------------------------------------------------------------------------
+   Right-side cart panel.
+   Opens with transform instead of display for smooth animation.
+   ========================================================================== */
+
+.cart-drawer {
+	position: fixed;
+	top: 0;
+	right: 0;
+	transform: translateX(100%);
+	width: 620px;
+	max-width: 100%;
+	height: 100vh;
+	background: #fff;
+	z-index: 9999;
+	transition: transform 0.5s ease-in-out;
+	box-shadow: -20px 0 60px rgba(0, 0, 0, 0.12);
+}
+
+.cart-drawer.is-open {
+	transform: translateX(0);
+}
+
+/* ==========================================================================
+   Header
+   --------------------------------------------------------------------------
+   Contains cart title and close button.
+   JS may update the product count inside .cart-drawer__title.
+   ========================================================================== */
+
+.cart-drawer__head {
+	height: 72px;
+	padding: 0 28px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-bottom: 1px solid #e8e8e8;
+}
+
+.cart-drawer__head h2 {
+	margin: 0;
+	font-family: 'Playfair Display', serif;
+	font-size: 24px;
+	font-weight: 500;
+	line-height: 1;
+}
+
+.cart-drawer__close {
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+}
+
+.cart-drawer__close img {
+	width: 18px;
+	height: 18px;
+	display: block;
+}
+
+/* ==========================================================================
+   Promo notice
+   --------------------------------------------------------------------------
+   Informational block shown above product list.
+   Used to explain promo-code limitations during sale periods.
+   ========================================================================== */
+
+.cart-drawer__notice {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 28px;
+	border-bottom: 1px solid #efefef;
+	font-size: 11px;
+	line-height: 1.4;
+	color: #555;
+}
+
+.cart-drawer__notice-icon {
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: #111;
+	color: #fff;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 11px;
+	line-height: 1;
+	flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Default drawer body / empty body layout
+   --------------------------------------------------------------------------
+   Base body layout. The items version overrides this with
+   .cart-drawer__body_items.
+   ========================================================================== */
+
+.cart-drawer__body {
+	height: calc(100vh - 72px);
+	padding: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+}
+
+/* ==========================================================================
+   Empty cart state
+   --------------------------------------------------------------------------
+   This state is shown by JS when there are no .cart-item elements.
+   ========================================================================== */
+
+.cart-empty-state {
+	height: calc(100vh - 152px);
+	padding: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	flex-direction: column;
+}
+
+.cart-empty {
+	max-width: 260px;
+	text-align: center;
+	transform: translateY(-30px);
+	padding-bottom: 48px;
+}
+
+.cart-empty__icon {
+	width: 100px;
+	height: 100px;
+	margin: 0 auto 18px;
+	border-radius: 50%;
+	background: #f5f1ef;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.cart-empty__icon img {
+	width: 42px;
+	height: 42px;
+}
+
+.cart-empty__title {
+	font-family: 'Playfair Display', serif;
+	font-size: 24px;
+	margin-bottom: 14px;
+}
+
+.cart-empty__text {
+	font-size: 14px;
+	line-height: 1.45;
+	color: #777;
+	margin-bottom: 24px;
+}
+
+.cart-empty__button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 250px;
+	height: 46px;
+	padding: 0 28px;
+	background: #111;
+	color: #fff;
+	border-radius: 4px;
+	font-size: 13px;
+	font-weight: 400;
+}
+
+/* ==========================================================================
+   Cart items body
+   --------------------------------------------------------------------------
+   Scrollable product list.
+   Max height leaves space for fixed summary block at the bottom.
+   ========================================================================== */
+
+.cart-drawer__body_items {
+	height: auto;
+	display: block;
+	padding: 0;
+	text-align: left;
+	max-height: calc(100vh - 112px - 320px);
+	overflow-y: auto;
+}
+
+/* ==========================================================================
+   Cart item
+   --------------------------------------------------------------------------
+   Each item requires:
+   - data-price
+   - data-old-price
+   - data-discount
+
+   JS reads these attributes to calculate totals and promo discounts.
+   ========================================================================== */
+
+.cart-item {
+	display: grid;
+	grid-template-columns: 96px 1fr;
+	gap: 18px;
+	padding: 24px 28px;
+	border-bottom: 1px solid #eee;
+	align-items: start;
+	transition:
+		opacity 0.2s ease,
+		transform 0.2s ease;
+}
+
+.cart-item.is-removing {
+	opacity: 0;
+	transform: translateX(20px);
+}
+
+.cart-item__image {
+	display: block;
+	background: #f7f7f7;
+	aspect-ratio: 1 / 1;
+	width: 96px;
+	height: 96px;
+}
+
+.cart-item__image img {
+	width: 100%;
+	height: 100%;
+}
+
+.cart-item__content {
+	min-width: 0;
+}
+
+.cart-item__top {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.cart-item__brand {
+	font-size: 10px;
+	line-height: 1;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #8c8c8c;
+	margin-bottom: 6px;
+}
+
+.cart-item__name {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	max-width: 300px;
+	font-size: 13px;
+	line-height: 1.25;
+	font-weight: 500;
+	color: #111;
+}
+
+.cart-item__remove {
+	width: 25px;
+	height: 25px;
+	border: 0;
+	background: transparent;
+	padding: 11px 0 0;
+	cursor: pointer;
+	flex-shrink: 0;
+}
+
+.cart-item__remove img {
+	width: 20px;
+	height: 20px;
+}
+
+.cart-item__meta {
+	margin-top: 8px;
+	font-size: 12px;
+	color: #777;
+}
+
+.cart-item__bottom {
+	margin-top: 14px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+/* ==========================================================================
+   Quantity controls
+   --------------------------------------------------------------------------
+   JS updates .cart-item__qty-value and recalculates totals.
+   ========================================================================== */
+
+.cart-item__qty {
+	display: inline-flex;
+	align-items: center;
+	gap: 14px;
+	font-size: 13px;
+}
+
+.cart-item__qty button {
+	border: 0;
+	background: transparent;
+	font-size: 16px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+/* ==========================================================================
+   Item prices
+   --------------------------------------------------------------------------
+   Old price is shown only for discounted items.
+   ========================================================================== */
+
+.cart-item__prices {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-left: auto;
+}
+
+.cart-item__price {
+	margin-left: auto;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.cart-item__old-price {
+	font-size: 12px;
+	color: #9b9b9b;
+	text-decoration: line-through;
+	white-space: nowrap;
+}
+
+/* ==========================================================================
+   Summary block
+   --------------------------------------------------------------------------
+   Fixed bottom section with delivery note, promo code, totals,
+   checkout and continue-shopping actions.
+   ========================================================================== */
+
+.cart-summary {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	padding: 24px 28px;
+	background: #fff;
+	border-top: 1px solid #eaeaea;
+}
+
+.cart-summary__delivery {
+	text-align: center;
+	font-size: 14px;
+	color: #777;
+	margin-bottom: 17px;
+}
+
+.cart-summary__delivery span {
+	color: #d34a4a;
+}
+
+.cart-summary__promo {
+	display: flex;
+	gap: 8px;
+	margin-bottom: 20px;
+}
+
+.cart-summary__input {
+	flex: 1;
+	height: 42px;
+	padding: 0 12px;
+	border: 1px dashed #dcdcdc;
+	border-radius: 5px;
+}
+
+.cart-summary__apply {
+	height: 42px;
+	padding: 0 18px;
+	border: 0;
+	background: #111;
+	color: #fff;
+	cursor: pointer;
+	border-radius: 5px;
+}
+
+.cart-summary__promo-message {
+	min-height: 16px;
+	margin: -10px 0 14px;
+	font-size: 12px;
+	line-height: 1.3;
+}
+
+.cart-summary__promo-message.is-error {
+	color: #d34a4a;
+}
+
+.cart-summary__promo-message.is-success {
+	color: #2f8f4e;
+}
+
+.cart-summary__row {
+	display: flex;
+	justify-content: space-between;
+	font-size: 14px;
+	margin-bottom: 10px;
+}
+
+.cart-summary__discount {
+	color: #d34a4a;
+}
+
+.cart-summary__total {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 16px;
+	padding-top: 16px;
+	border-top: 1px solid #eaeaea;
+	font-size: 22px;
+	font-weight: 600;
+}
+
+.cart-summary__checkout {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 52px;
+	margin-top: 20px;
+	background: #111;
+	color: #fff;
+	text-decoration: none;
+	border-radius: 10px;
+}
+
+.cart-summary__continue {
+	width: 100%;
+	height: 52px;
+	margin-top: 10px;
+	border: 1px solid #dcdcdc;
+	background: #fff;
+	cursor: pointer;
+	border-radius: 10px;
+}
+
+/* ==========================================================================
+   Legacy / unused footer
+   --------------------------------------------------------------------------
+   Kept for compatibility with older cart empty layout.
+   Can be removed if not used in final implementation.
+   ========================================================================== */
+
+.cart-drawer__footer {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	height: 48px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
+	color: #8c8c8c;
+	border-top: 1px solid #f1f1f1;
+	background: #fff;
+}
+
+.cart-drawer__footer span {
+	color: #d04b4b;
+	font-size: 14px;
+	font-weight: 400;
+	padding-left: 5px;
+}
+
+/* ==========================================================================
+   Transitions
+   ========================================================================== */
+
+.cart-summary__apply,
+.cart-summary__checkout,
+.cart-summary__continue,
+.cart-empty__button,
+.cart-item__qty button,
+.cart-drawer__close,
+.cart-item__remove {
+	transition:
+		opacity 0.2s ease,
+		transform 0.2s ease,
+		background 0.2s ease,
+		border-color 0.2s ease;
+}
+
+/* ==========================================================================
+   Hover states
+   --------------------------------------------------------------------------
+   Hover effects are limited to devices that actually support hover.
+   This prevents sticky hover states on mobile.
+   ========================================================================== */
+
+@media (hover: hover) {
+	.cart-summary__apply:hover,
+	.cart-summary__checkout:hover,
+	.cart-empty__button:hover {
+		background: #333;
+	}
+
+	.cart-summary__continue:hover {
+		border-color: #111;
+	}
+
+	.cart-drawer__close:hover,
+	.cart-item__remove:hover,
+	.cart-item__qty button:hover {
+		opacity: 0.55;
+	}
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 720px) {
+	.cart-item__remove {
+		padding-top: 0;
+		padding-left: 13px;
+	}
+
+	.cart-drawer {
+		box-shadow: none;
+	}
+}

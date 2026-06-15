@@ -1,0 +1,1302 @@
+/* ==========================================================================
+   Checkout / Payments v2
+   --------------------------------------------------------------------------
+   Purpose:
+   Modern checkout experience for Vizaje-Nica.
+
+   UX goals:
+   - Split checkout into 3 clear steps.
+   - Reduce visual overload.
+   - Improve mobile checkout experience.
+   - Make delivery, recipient and payment choices easier.
+   - Show clear validation and success feedback.
+
+   Related files:
+   - payments.php
+   - payments.js
+   - language.json
+   - README.md
+   - design/
+
+   Important:
+   - Selected store must be saved in order and shown in admin.
+   - Selected confirmation type must be saved in order and shown in admin.
+   - Mail delivery is prepared as future feature, not final business logic.
+   ========================================================================== */
+
+/* ==========================================================================
+   Checkout Layout Reset
+   --------------------------------------------------------------------------
+   Hide global website elements on checkout page.
+   Checkout uses its own minimal header and layout.
+   ========================================================================== */
+
+.checkout-layout .header,
+.checkout-layout footer,
+.checkout-layout .footer,
+.checkout-layout .header__promo,
+.checkout-layout .cart-drawer,
+.checkout-layout .cart-overlay {
+	display: none !important;
+}
+
+/* ==========================================================================
+   Checkout Header
+   ========================================================================== */
+
+.checkout-header {
+	height: 72px;
+	display: grid;
+	grid-template-columns: 1fr auto 1fr;
+	align-items: center;
+	padding: 0 48px;
+	border-bottom: 1px solid #eee;
+	background: #fff;
+}
+
+.checkout-header__back {
+	font-size: 36px;
+	line-height: 1;
+	color: #111;
+	text-decoration: none;
+}
+
+.checkout-header__logo img {
+	height: 38px;
+	display: block;
+}
+
+.checkout-header__lang {
+	display: flex;
+	justify-content: flex-end;
+	gap: 14px;
+	font-size: 14px;
+}
+
+.checkout-header__lang a {
+	color: #111;
+	text-decoration: none;
+}
+
+/* ==========================================================================
+   Checkout Page
+   ========================================================================== */
+
+.checkout-page {
+	margin-top: 20px;
+	padding: 56px 0 120px;
+	background: #fff;
+}
+
+.checkout-page__container {
+	max-width: 1120px;
+	margin: 0 auto;
+	padding: 0 24px;
+	display: grid;
+	grid-template-columns: minmax(0, 640px) 360px;
+	gap: 48px;
+	align-items: start;
+}
+
+.checkout-page h1 {
+	margin-bottom: 42px;
+	font-size: 34px;
+	line-height: 1.15;
+	font-weight: 600;
+}
+
+/* ==========================================================================
+   Order Summary
+   --------------------------------------------------------------------------
+   Sticky on desktop.
+   On mobile it moves below checkout steps.
+   ========================================================================== */
+
+.checkout-summary {
+	position: sticky;
+	top: 96px;
+	padding: 28px;
+	background: #f8f8f8;
+	border-radius: 6px;
+}
+
+.checkout-summary h2 {
+	margin-bottom: 24px;
+	font-size: 22px;
+	font-weight: 500;
+}
+
+.checkout-summary__row,
+.checkout-summary__total {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 16px;
+}
+
+.checkout-summary__row {
+	margin-bottom: 14px;
+	font-size: 15px;
+}
+
+.checkout-summary__total {
+	margin-top: 20px;
+	padding-top: 18px;
+	border-top: 1px solid #ddd;
+	font-size: 22px;
+	font-weight: 700;
+}
+
+.checkout-summary__button {
+	width: 100%;
+	height: 52px;
+	margin-top: 26px;
+	border: 0;
+	border-radius: 4px;
+	background: #111;
+	color: #fff;
+	font-size: 15px;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.checkout-summary__note {
+	margin-top: 14px;
+	font-size: 12px;
+	line-height: 1.45;
+	color: #777;
+}
+
+/* ==========================================================================
+   Checkout Steps
+   --------------------------------------------------------------------------
+   Accordion structure:
+   - .is-open shows current step.
+   - .is-completed marks already completed step.
+   - .has-error highlights step with validation error.
+   ========================================================================== */
+
+.checkout-step {
+	margin-top: 30px;
+	margin-bottom: 34px;
+	opacity: 0.45;
+	transition: opacity 0.25s ease;
+}
+
+.checkout-step.is-open,
+.checkout-step.is-completed {
+	opacity: 1;
+}
+
+.checkout-step__head {
+	width: 100%;
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	align-items: center;
+	gap: 18px;
+	padding: 0 0 14px;
+	border: 0;
+	border-bottom: 1px solid #111;
+	background: transparent;
+	text-align: left;
+	cursor: pointer;
+}
+
+.checkout-step__head span {
+	font-size: 22px;
+	font-weight: 600;
+}
+
+.checkout-step__head strong {
+	font-size: 24px;
+	font-weight: 600;
+}
+
+.checkout-step__head em {
+	font-style: normal;
+	font-size: 20px;
+	transition: transform 0.25s ease;
+}
+
+.checkout-step:not(.is-open) .checkout-step__head em {
+	transform: rotate(180deg);
+}
+
+.checkout-step__body {
+	display: grid;
+	grid-template-rows: 0fr;
+	overflow: hidden;
+	padding-top: 0;
+	opacity: 0.7;
+	transform: translateY(-6px);
+	transition:
+		grid-template-rows 0.45s ease,
+		padding-top 0.45s ease,
+		opacity 0.3s ease,
+		transform 0.3s ease;
+}
+
+.checkout-step.is-open .checkout-step__body {
+	grid-template-rows: 1fr;
+	padding-top: 20px;
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.checkout-step__body-inner {
+	min-height: 0;
+	overflow: hidden;
+}
+
+.checkout-step__next {
+	width: 180px;
+	height: 46px;
+	margin-top: 24px;
+	border: 0;
+	border-radius: 4px;
+	background: #111;
+	color: #fff;
+	cursor: pointer;
+}
+
+/* ==========================================================================
+   Delivery & Payment Options
+   ========================================================================== */
+
+.checkout-options {
+	margin-top: 5px;
+	display: grid;
+	gap: 14px;
+}
+
+.checkout-option {
+	position: relative;
+	display: block;
+	width: 100%;
+	min-height: 88px;
+	padding: 22px 24px;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	text-align: left;
+	cursor: pointer;
+	overflow: hidden;
+	transition:
+		transform 0.25s ease,
+		border-color 0.25s ease,
+		background 0.25s ease,
+		box-shadow 0.25s ease;
+}
+
+.checkout-option.is-active {
+	border-color: #111;
+	transform: translateY(-2px);
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.checkout-option__head {
+	display: grid;
+	grid-template-columns: 20px 36px 1fr;
+	align-items: center;
+	gap: 18px;
+}
+
+.checkout-option__radio {
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	border: 1px solid #bdbdbd;
+	position: relative;
+	background: #fff;
+	transition: border-color 0.25s ease;
+}
+
+.checkout-option__radio::after {
+	content: '';
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: #111;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%) scale(0);
+	transition: transform 0.25s ease;
+}
+
+.checkout-option.is-active .checkout-option__radio::after {
+	transform: translate(-50%, -50%) scale(1);
+}
+
+.checkout-option__icon {
+	width: 36px;
+	height: 36px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.checkout-option__icon img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	transition: filter 0.25s ease;
+}
+
+.checkout-option__title {
+	display: block;
+	font-size: 16px;
+	font-weight: 600;
+	color: #111;
+	transition: color 0.25s ease;
+}
+
+.checkout-option__text {
+	display: block;
+	margin-top: 6px;
+	font-size: 13px;
+	color: #777;
+	transition: color 0.25s ease;
+}
+
+/* ==========================================================================
+   Option Expand Content
+   --------------------------------------------------------------------------
+   Used inside active delivery cards:
+   pickup stores, courier form, express form, mail delivery form.
+   ========================================================================== */
+
+.checkout-option__expand {
+	display: grid;
+	grid-template-rows: 0fr;
+	overflow: hidden;
+	opacity: 0;
+	margin-top: 18px;
+	padding-top: 18px;
+	border-top: 1px solid #e8e8e8;
+	transition:
+		grid-template-rows 0.45s ease,
+		opacity 0.3s ease,
+		margin-top 0.35s ease;
+}
+
+.checkout-option__expand > * {
+	min-height: 0;
+	overflow: hidden;
+}
+
+.checkout-option.is-active .checkout-option__expand {
+	grid-template-rows: 1fr;
+	opacity: 1;
+	margin-top: 24px;
+}
+
+.checkout-option.is-active .checkout-pick-item {
+	background: #fff;
+	color: #111;
+}
+
+.checkout-option.is-active .checkout-pick-item__content strong {
+	color: #111;
+}
+
+.checkout-option.is-active .checkout-pick-item__content small {
+	color: #777;
+}
+
+/* ==========================================================================
+   Online Payment Option
+   --------------------------------------------------------------------------
+   Payment icons are shown inside the online payment card.
+   ========================================================================== */
+
+.checkout-option__second .checkout-option__head {
+	grid-template-columns: 20px 36px 1fr auto;
+}
+
+.checkout-option__icon-cart {
+	width: 30px;
+	height: 30px;
+}
+
+.checkout-option__icon-second {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 10px;
+}
+
+.checkout-option__icon-second img {
+	width: 30px;
+	height: 30px;
+	object-fit: contain;
+}
+
+.checkout-option__icon-second img:nth-child(3),
+.checkout-option__icon-second img:nth-child(4) {
+	width: 40px;
+	height: 40px;
+}
+
+.checkout-option.is-active .checkout-option__icon-second img {
+	filter: none;
+}
+
+/* ==========================================================================
+   Delivery Details
+   ========================================================================== */
+
+.checkout-delivery-details {
+	margin-top: 18px;
+}
+
+.checkout-delivery-panel {
+	padding: 20px;
+	border: 1px solid #e5e5e5;
+	border-radius: 6px;
+	background: #fafafa;
+}
+
+.checkout-delivery-panel.is-active {
+	display: block;
+}
+
+.checkout-delivery-panel__label {
+	margin-bottom: 12px;
+	font-size: 13px;
+	color: #777;
+}
+
+.checkout-delivery-panel__notice {
+	margin-bottom: 18px;
+	padding: 12px 14px;
+	border: 1px solid #f2dfb0;
+	border-radius: 6px;
+	background: #fff8e8;
+	color: #8a6d3b;
+	font-size: 14px;
+}
+
+/* ==========================================================================
+   Pickup Stores & Mail Delivery Selection
+   --------------------------------------------------------------------------
+   Current status:
+   - Pickup stores are test data.
+   - Mail delivery is prepared as future feature.
+
+   TODO:
+   - Add all 12 Vizaje-Nica stores.
+   - Save selected store in order.
+   - Show selected store in admin order details.
+   - Save selected confirmation type: phone call / SMS.
+   - Do not implement final mail delivery until business rules are confirmed.
+   ========================================================================== */
+
+.checkout-pick-list {
+	display: grid;
+	gap: 12px;
+}
+
+.checkout-pick-item {
+	position: relative;
+	display: grid;
+	grid-template-columns: 18px 1fr;
+	gap: 14px;
+	align-items: start;
+	padding: 16px;
+	background: #fff;
+	border: 1px solid #e5e5e5;
+	border-radius: 6px;
+	cursor: pointer;
+	transition:
+		border-color 0.2s ease,
+		background 0.2s ease;
+}
+
+.checkout-pick-item input {
+	display: none;
+}
+
+.checkout-pick-item.is-active {
+	border-color: #111;
+	background: #fafafa;
+}
+
+.checkout-pick-item__radio {
+	width: 18px;
+	height: 18px;
+	border: 1px solid #bdbdbd;
+	border-radius: 50%;
+	position: relative;
+	margin-top: 2px;
+}
+
+.checkout-pick-item__radio::after {
+	content: '';
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: #111;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%) scale(0);
+	transition: transform 0.2s ease;
+}
+
+.checkout-pick-item input:checked + .checkout-pick-item__radio::after,
+.checkout-pick-item.is-active .checkout-pick-item__radio::after {
+	transform: translate(-50%, -50%) scale(1);
+}
+
+.checkout-pick-item__content {
+	display: grid;
+	gap: 5px;
+}
+
+.checkout-pick-item__content strong {
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.checkout-pick-item__content small {
+	font-size: 13px;
+	color: #777;
+}
+
+.checkout-post-form {
+	margin-top: 18px;
+}
+
+/* ==========================================================================
+   Checkout Forms
+   ========================================================================== */
+
+.checkout-form {
+	display: grid;
+	gap: 18px;
+}
+
+.checkout-field,
+.checkout-form label {
+	position: relative;
+	display: block;
+}
+
+.checkout-field::after {
+	content: '';
+	position: absolute;
+	left: 50%;
+	bottom: 0;
+	width: 0;
+	height: 2px;
+	background: #111;
+	transform: translateX(-50%);
+	transition: width 0.35s ease;
+}
+
+.checkout-field:focus-within::after {
+	width: 100%;
+}
+
+.checkout-form label img,
+.checkout-field img {
+	position: absolute;
+	left: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 18px;
+	height: 18px;
+	object-fit: contain;
+	opacity: 0.65;
+}
+
+.checkout-form input {
+	width: 100%;
+	height: 52px;
+	padding-left: 30px;
+	border: 0;
+	border-bottom: 1px solid #d9d9d9;
+	background: transparent;
+	font-size: 15px;
+	outline: none;
+	transition:
+		border-color 0.25s ease,
+		box-shadow 0.25s ease;
+}
+
+.checkout-form input:focus {
+	border-bottom-color: #111;
+	box-shadow: 0 0 0 #111;
+}
+
+.checkout-field input {
+	border-bottom: 1px solid #d9d9d9;
+	transition: border-color 0.25s ease;
+}
+
+.checkout-field:focus-within input {
+	border-bottom-color: transparent;
+}
+
+.checkout-form__grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 16px;
+}
+
+.checkout-form__grid input {
+	padding-left: 0;
+}
+
+.checkout-field--comment {
+	margin-top: 4px;
+}
+
+.checkout-field--comment::after {
+	display: none;
+}
+
+.checkout-field__label {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 8px;
+	font-size: 13px;
+	line-height: 1.3;
+	color: #555;
+}
+
+.checkout-field__label small {
+	color: #999;
+	font-size: 12px;
+}
+
+.checkout-field__textarea {
+	width: 100%;
+	min-height: 96px;
+	padding: 14px 16px;
+	border: 1px solid #d9d9d9;
+	border-radius: 6px;
+	background: #fff;
+	color: #111;
+	font-size: 14px;
+	line-height: 1.5;
+	outline: none;
+	resize: vertical;
+	transition:
+		border-color 0.25s ease,
+		box-shadow 0.25s ease;
+}
+
+.checkout-field__textarea:focus {
+	border-color: #111;
+	box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.04);
+}
+
+.checkout-field__textarea::placeholder {
+	color: #999;
+}
+
+/* ==========================================================================
+   Online Payment Fields
+   --------------------------------------------------------------------------
+   Name and surname fields are shown only when online payment is selected.
+   ========================================================================== */
+
+.checkout-online-fields {
+	display: grid;
+	grid-template-rows: 0fr;
+	overflow: hidden;
+	margin-top: 0;
+	padding: 0 18px;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	background: #fafafa;
+	opacity: 0;
+	transform: translateY(-6px);
+	transition:
+		grid-template-rows 0.35s ease,
+		margin-top 0.35s ease,
+		padding 0.35s ease,
+		border-color 0.35s ease,
+		opacity 0.25s ease,
+		transform 0.25s ease;
+}
+
+.checkout-online-fields.is-visible {
+	grid-template-rows: 1fr;
+	margin-top: 16px;
+	padding: 18px;
+	border-color: #e5e5e5;
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.checkout-online-fields .checkout-form {
+	min-height: 0;
+	overflow: hidden;
+}
+
+.checkout-field--name {
+	display: none;
+}
+
+.checkout-field--name.is-visible {
+	display: block;
+}
+
+.checkout-field--name.is-required input {
+	border-bottom-color: #111;
+}
+
+.checkout-field--name.is-required::after {
+	content: '*';
+	position: absolute;
+	right: 0;
+	top: 15px;
+	color: #d34a4a;
+	font-size: 16px;
+}
+
+/* ==========================================================================
+   Confirmation Method
+   --------------------------------------------------------------------------
+   Customer can choose preferred confirmation method:
+   - Phone call
+   - SMS
+
+   Important:
+   This value must be saved in order and shown in admin.
+   ========================================================================== */
+
+.checkout-confirm {
+	display: flex;
+	gap: 24px;
+	flex-wrap: wrap;
+	margin-top: 22px;
+}
+
+.checkout-radio {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	cursor: pointer;
+}
+
+.checkout-radio input {
+	display: none;
+}
+
+.checkout-radio > span {
+	width: 18px;
+	height: 18px;
+	border: 1px solid #bdbdbd;
+	border-radius: 50%;
+	position: relative;
+}
+
+.checkout-radio > span::after {
+	content: '';
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: #0363f0;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%) scale(0);
+	transition: transform 0.2s ease;
+}
+
+.checkout-radio input:checked + span {
+	border-color: #0363f0;
+}
+
+.checkout-radio input:checked + span::after {
+	transform: translate(-50%, -50%) scale(1);
+}
+
+.checkout-radio p {
+	margin: 0;
+	font-size: 14px;
+}
+
+/* ==========================================================================
+   Agreements
+   ========================================================================== */
+
+.checkout-agreements {
+	display: grid;
+	gap: 12px;
+	margin-top: 24px;
+}
+
+.checkout-checkbox {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	cursor: pointer;
+}
+
+.checkout-checkbox input {
+	display: none;
+}
+
+.checkout-checkbox > span {
+	width: 18px;
+	height: 18px;
+	flex: 0 0 18px;
+	position: relative;
+	margin-top: 1px;
+	border: 1px solid #cfcfcf;
+}
+
+.checkout-checkbox > span::after {
+	content: '✓';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%) scale(0);
+	color: #fff;
+	font-size: 13px;
+	line-height: 1;
+	transition: transform 0.2s ease;
+}
+
+.checkout-checkbox input:checked + span {
+	background: #1c1c1c;
+	border-color: #1c1c1c;
+}
+
+.checkout-checkbox input:checked + span::after {
+	transform: translate(-50%, -50%) scale(1);
+}
+
+.checkout-checkbox p {
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+.checkout-checkbox a {
+	color: #0363f0;
+	text-decoration: none;
+}
+
+/* ==========================================================================
+   Validation & Error States
+   ========================================================================== */
+
+.checkout-alert {
+	display: none;
+	margin-bottom: 24px;
+	padding: 16px 18px;
+	border: 1px solid #f0c7c7;
+	border-radius: 8px;
+	background: #fff5f5;
+	color: #9f2d2d;
+	opacity: 0;
+	transform: translateY(-8px);
+	transition:
+		opacity 0.3s ease,
+		transform 0.3s ease;
+}
+
+.checkout-alert.is-open {
+	display: grid;
+	gap: 4px;
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.checkout-alert strong {
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.checkout-alert span {
+	font-size: 13px;
+	line-height: 1.4;
+}
+
+.checkout-field.is-error input {
+	border-bottom-color: #d34a4a;
+}
+
+.checkout-field.is-error::after {
+	width: 100%;
+	background: #d34a4a;
+}
+
+.checkout-field__error {
+	margin-top: 6px;
+	font-size: 12px;
+	color: #d34a4a;
+}
+
+.checkout-checkbox.is-error > span {
+	border-color: #d34a4a;
+	box-shadow: 0 0 0 3px rgba(211, 74, 74, 0.12);
+}
+
+.checkout-step.has-error {
+	opacity: 1;
+}
+
+.checkout-step.has-error .checkout-step__head {
+	border-bottom-color: #d34a4a;
+}
+
+.checkout-step.has-error .checkout-step__head strong,
+.checkout-step.has-error .checkout-step__head span {
+	color: #d34a4a;
+}
+
+/* ==========================================================================
+   Buttons Animation
+   ========================================================================== */
+
+.checkout-step__next,
+.checkout-summary__button {
+	position: relative;
+	overflow: hidden;
+	transition:
+		transform 0.25s ease,
+		box-shadow 0.25s ease,
+		background 0.25s ease;
+}
+
+/* ==========================================================================
+   Success Modal
+   --------------------------------------------------------------------------
+   Displayed after successful order creation.
+
+   For online payment:
+   - Show after successful Paynet redirect.
+
+   For cash/card courier:
+   - Show after successful order creation.
+   ========================================================================== */
+
+.order-success-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 10050;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	transition:
+		opacity 0.45s ease,
+		visibility 0.45s ease;
+}
+
+.order-success-modal.is-open {
+	opacity: 1;
+	visibility: visible;
+	pointer-events: auto;
+}
+
+.order-success-modal__overlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.45);
+	backdrop-filter: blur(8px);
+}
+
+.order-success-modal__box {
+	position: relative;
+	width: min(460px, calc(100% - 32px));
+	padding: 42px 36px 34px;
+	background: radial-gradient(circle at top, #fff7f3 0, #fff 42%), #fff;
+	border-radius: 18px;
+	text-align: center;
+	box-shadow:
+		0 30px 90px rgba(0, 0, 0, 0.22),
+		0 0 0 1px rgba(255, 255, 255, 0.6);
+	transform: translateY(24px) scale(0.96);
+	opacity: 0;
+	transition:
+		transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+		opacity 0.45s ease;
+}
+
+.order-success-modal.is-open .order-success-modal__box {
+	transform: translateY(0) scale(1);
+	opacity: 1;
+}
+
+.order-success-modal__close {
+	position: absolute;
+	top: 16px;
+	right: 18px;
+	border: 0;
+	background: transparent;
+	font-size: 28px;
+	line-height: 1;
+	cursor: pointer;
+	color: #111;
+}
+
+.order-success-modal__icon {
+	width: 76px;
+	height: 76px;
+	margin: 0 auto 20px;
+	border-radius: 50%;
+	background: #111;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+}
+
+.order-success-modal__icon span {
+	color: #fff;
+	font-size: 36px;
+	line-height: 1;
+}
+
+.order-success-modal__eyebrow {
+	margin: 0 0 10px;
+	font-size: 12px;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: #9a7b6f;
+}
+
+.order-success-modal h2 {
+	margin: 0 0 14px;
+	font-family: 'Playfair Display', serif;
+	font-size: 32px;
+	font-weight: 500;
+	line-height: 1.1;
+	color: #111;
+}
+
+.order-success-modal__text {
+	max-width: 360px;
+	margin: 0 auto 22px;
+	font-size: 15px;
+	line-height: 1.55;
+	color: #666;
+}
+
+.order-success-modal__button {
+	width: 100%;
+	height: 50px;
+	border: 0;
+	border-radius: 6px;
+	background: #111;
+	color: #fff;
+	font-size: 15px;
+	font-weight: 600;
+	cursor: pointer;
+	transition:
+		transform 0.25s ease,
+		box-shadow 0.25s ease,
+		background 0.25s ease;
+}
+
+/* ==========================================================================
+   Paynet Test Page
+   --------------------------------------------------------------------------
+   Temporary page for testing online payment flow.
+   Can be removed after real Paynet integration.
+   ========================================================================== */
+
+.paynet-test {
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+	background: #f8f8f8;
+}
+
+.paynet-test__box {
+	width: min(420px, 100%);
+	padding: 36px;
+	background: #fff;
+	border-radius: 16px;
+	text-align: center;
+	box-shadow: 0 24px 80px rgba(0, 0, 0, 0.12);
+}
+
+.paynet-test__eyebrow {
+	margin-bottom: 10px;
+	font-size: 12px;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: #777;
+}
+
+.paynet-test h1 {
+	margin-bottom: 14px;
+	font-size: 34px;
+}
+
+.paynet-test__text {
+	margin-bottom: 24px;
+	font-size: 15px;
+	line-height: 1.5;
+	color: #666;
+}
+
+.paynet-test__summary {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 24px;
+	padding: 18px;
+	background: #fafafa;
+	border: 1px solid #eee;
+}
+
+.paynet-test__button {
+	width: 100%;
+	height: 52px;
+	border: 0;
+	border-radius: 6px;
+	background: #111;
+	color: #fff;
+	cursor: pointer;
+}
+
+/* ==========================================================================
+   Hover States
+   ========================================================================== */
+
+@media (hover: hover) {
+	.checkout-option:hover {
+		border-color: #111;
+		transform: translateY(-2px);
+		box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+	}
+
+	.checkout-step__next:hover,
+	.checkout-summary__button:hover,
+	.order-success-modal__button:hover {
+		background: #000;
+		transform: translateY(-2px);
+		box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+	}
+
+	.checkout-step__next:active,
+	.checkout-summary__button:active {
+		transform: translateY(0);
+		box-shadow: 0 5px 14px rgba(0, 0, 0, 0.14);
+	}
+}
+
+/* ==========================================================================
+   Mobile Layout
+   ========================================================================== */
+
+@media (max-width: 768px) {
+	.checkout-header {
+		height: 64px;
+		padding: 0 20px;
+	}
+
+	.checkout-header__back {
+		font-size: 30px;
+	}
+
+	.checkout-header__logo img {
+		height: 30px;
+	}
+
+	.checkout-page {
+		padding: 32px 0 80px;
+	}
+
+	.checkout-page__container {
+		display: flex;
+		flex-direction: column;
+		gap: 28px;
+		padding: 0 20px;
+	}
+
+	.checkout-summary {
+		position: static;
+		order: 10;
+		width: 100%;
+		padding: 22px;
+	}
+
+	.checkout-page h1 {
+		font-size: 30px;
+		margin-bottom: 34px;
+	}
+
+	.checkout-step__head {
+		gap: 12px;
+	}
+
+	.checkout-step__head span {
+		font-size: 18px;
+	}
+
+	.checkout-step__head strong {
+		font-size: 22px;
+	}
+
+	.checkout-form__grid {
+		grid-template-columns: 1fr;
+	}
+
+	.checkout-confirm {
+		display: grid;
+		gap: 16px;
+	}
+
+	.checkout-option {
+		padding: 18px;
+		min-height: 82px;
+	}
+
+	.checkout-option__head {
+		grid-template-columns: 20px 34px 1fr;
+		gap: 14px;
+	}
+
+	.checkout-option__second .checkout-option__head {
+		grid-template-columns: 20px 34px 1fr;
+		grid-template-areas:
+			'radio icon title'
+			'. . payments';
+		row-gap: 14px;
+		align-items: center;
+	}
+
+	.checkout-option__second .checkout-option__radio {
+		grid-area: radio;
+	}
+
+	.checkout-option__second .checkout-option__icon-cart {
+		grid-area: icon;
+	}
+
+	.checkout-option__second .checkout-option__title {
+		grid-area: title;
+	}
+
+	.checkout-option__second .checkout-option__icon-second {
+		grid-area: payments;
+		display: grid;
+		grid-template-columns: repeat(4, max-content);
+		gap: 10px;
+		justify-content: start;
+		align-items: center;
+	}
+
+	.checkout-option.is-active .checkout-option__expand {
+		margin-top: 20px;
+	}
+
+	.checkout-online-fields {
+		margin-left: 0;
+	}
+}

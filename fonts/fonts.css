@@ -1,0 +1,184 @@
+/* ==========================================================================
+Vizaje-Nica Typography System
+-----------------------------
+
+Purpose:
+Unified typography system for Vizaje-Nica redesign.
+
+Fonts:
+
+* Jost → UI, forms, buttons, navigation, product cards, checkout.
+* Playfair Display → headings, hero sections, marketing blocks.
+
+Design references:
+
+* Apple
+* Aesop
+* Dior Beauty
+* Chanel Beauty
+* Rhode
+* Glossier
+
+Important:
+
+* Fonts are loaded locally via .woff2 files.
+* Do not replace with Google Fonts.
+* New components should use existing typography system.
+
+Related files:
+
+* README.md
+* design/
+
+Usage rules:
+
+Jost:
+
+* body
+* buttons
+* forms
+* navigation
+* catalog
+* product cards
+* checkout
+* cart
+
+Playfair Display:
+
+* h1
+* h2
+* h3
+* hero titles
+* brand sections
+* promotional content
+  ========================================================================== */
+
+/* ==========================================================================
+Jost
+----
+
+Main interface font.
+Used across all functional UI elements.
+========================================================================== */
+
+@font-face {
+	font-family: 'Jost';
+	font-display: swap;
+	src: url('../fonts/Jost-Light.woff2') format('woff2');
+	font-weight: 300;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Jost';
+	font-display: swap;
+	src: url('../fonts/Jost-Regular.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Jost';
+	font-display: swap;
+	src: url('../fonts/Jost-Medium.woff2') format('woff2');
+	font-weight: 500;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Jost';
+	font-display: swap;
+	src: url('../fonts/Jost-SemiBold.woff2') format('woff2');
+	font-weight: 600;
+	font-style: normal;
+}
+
+/* ==========================================================================
+Playfair Display
+----------------
+
+Premium heading font.
+Used for visual hierarchy and luxury feel.
+========================================================================== */
+
+@font-face {
+	font-family: 'Playfair Display';
+	font-display: swap;
+	src: url('../fonts/playfair-display-v40-cyrillic_latin-regular.woff2')
+		format('woff2');
+	font-weight: 400;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Playfair Display';
+	font-display: swap;
+	src: url('../fonts/playfair-display-v40-cyrillic_latin-500.woff2')
+		format('woff2');
+	font-weight: 500;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Playfair Display';
+	font-display: swap;
+	src: url('../fonts/playfair-display-v40-cyrillic_latin-600.woff2')
+		format('woff2');
+	font-weight: 600;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Playfair Display';
+	font-display: swap;
+	src: url('../fonts/playfair-display-v40-cyrillic_latin-700.woff2')
+		format('woff2');
+	font-weight: 700;
+	font-style: normal;
+}
+
+/* ==========================================================================
+Global typography defaults
+--------------------------
+
+Base font setup for the entire project.
+========================================================================== */
+
+body {
+	font-family: 'Jost';
+	line-height: 1;
+	-ms-text-size-adjust: 100%;
+	-moz-text-size-adjust: 100%;
+	-webkit-text-size-adjust: 100%;
+}
+
+/* ==========================================================================
+Form controls
+-------------
+
+All interactive controls inherit Jost.
+========================================================================== */
+
+input,
+button,
+textarea {
+	font-family: 'Jost';
+}
+
+/* ==========================================================================
+Heading system
+--------------
+
+All semantic headings use Playfair Display.
+========================================================================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: 'Playfair Display';
+	font-weight: inherit;
+	font-size: inherit;
+}

@@ -1,0 +1,90 @@
+/* ==========================================================================
+Header Top Bar
+--------------
+
+Purpose:
+Global informational bar displayed above the main website header.
+
+Current message:
+
+* Free delivery from 500 MDL
+* 100% original products
+
+UX goals:
+
+* Build trust immediately after page load.
+* Highlight key customer benefits.
+* Increase confidence before entering catalog or checkout.
+
+Related files:
+
+* top-bar.php
+* top-bar.css
+* language.json
+* README.md
+
+Design references:
+
+* Makeup
+* Aesop
+* Dior Beauty
+* Chanel Beauty
+
+Important:
+
+* Should remain lightweight and unobtrusive.
+* Visible on all pages.
+* Text must come from language.json.
+  ========================================================================== */
+
+/* ==========================================================================
+Desktop
+-------
+
+Compact premium announcement bar.
+========================================================================== */
+
+.top-bar {
+	height: 34px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+
+	background: #111;
+	color: #fff;
+
+	font-size: 12px;
+	font-weight: 400;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+/* ==========================================================================
+Mobile
+------
+
+Reduced height and typography to preserve space.
+Long messages are truncated with ellipsis.
+========================================================================== */
+
+@media (max-width: 768px) {
+	.top-bar {
+		height: 32px;
+		padding: 0 12px;
+		gap: 6px;
+		font-size: 10px;
+		line-height: 1;
+		letter-spacing: 0.03em;
+		overflow: hidden;
+	}
+
+	.top-bar__text {
+		display: block;
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}
